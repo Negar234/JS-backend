@@ -1,0 +1,72 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="index.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <script src="jQuery.js"></script>
+        <script>
+            var basket = new Array()
+            $(document).ready(function(){
+
+                $.ajax({
+                    url:"/industrial.json",
+                    dataType : "json",
+                    method: "get",
+                    success:function(data){
+                        data.forEach(function(product,index,products){
+                            let pr = $("<div class='product'></div>")
+                            let name = "<div class='productName'>"+product.name+"</div>"
+                            let articleNumber = "<div class='productANumber'>"+product.articleNumber+"</div>"
+                            let price = "<div class='price'>"+product.price+"$</div>"
+                            let desc = "<div class='desc'>"+product.description+"</div>"
+                            let buy = "<div class='AddToBasket' onclick='AddToBasket(this)' >Add to Basket</div>"
+                            pr.html(name+articleNumber+price+desc+buy)
+                            $("#productList").append(pr)
+                        })
+                    }
+                })
+
+                
+            })
+
+            function AddToBasket(btn)
+            {
+                let pr = {
+                    prArticleNumber: $(btn).closest('.product').find('.productANumber').html(),
+                    price: $(btn).closest('.product').find('.price').html()
+                }
+                basket.push(pr)
+                if(basket.length>0)
+                {
+                    $("#basketHolder").html('<i class="material-icons" onclick="CheckOut()">shopping_cart_checkout</i>')
+                }
+                
+            }
+
+            function CheckOut()
+            {
+                //console.log(JSON.stringify(basket))
+                let username = prompt("Enter your Username:")
+                let params = {username:username , basket:basket}
+               // basket.forEach(function(product,index,basket){
+                    $.ajax({
+                        url:"http://localhost:50000/order",
+                        method:"post",
+                        dataType:"json",
+                        data:JSON.stringify(params),
+                        headers: {'Content-Type': 'application/json'},
+                        success:function(result){
+                            console.log(result)
+                        }
+                    })
+               // })
+            }
+        </script>
+    </head>
+    <body>
+        <div id="basketHolder"></div>
+        
+        <div id="container">
+            <div id="productList"></div>
+        </div>
+    </body>
+</html>
